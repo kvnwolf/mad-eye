@@ -1,0 +1,17 @@
+{
+	"extends": ["@kvnwolf/dobby/biome/core"],
+	"files": {
+		// biome `extends` REPLACES arrays, so the preset's ignores are repeated
+		// here, plus the rust build dir (vcs.useIgnoreFile can't help while the
+		// repo has no commits).
+		"includes": [
+			"!.claude",
+			"!.dobby",
+			"!.github",
+			"!**/*.md",
+			"!dist",
+			"!src-tauri/target",
+			"!src-tauri/gen"
+		]
+	}
+}

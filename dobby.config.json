@@ -1,0 +1,25 @@
+{
+	"tracker": { "type": "github" },
+	"files": [
+		{
+			"path": "CLAUDE.md",
+			"update_when": ["When the stack, module map, or workflow changes"]
+		},
+		{
+			"path": "CONTEXT.md",
+			"update_when": [
+				"When a domain term is added, renamed, or its meaning shifts"
+			]
+		},
+		{
+			"path": "README.md",
+			"update_when": ["When setup commands or usage change"]
+		}
+	],
+	"checks": [
+		{
+			"name": "cargo check",
+			"run": "cargo check --manifest-path src-tauri/Cargo.toml"
+		}
+	]
+}
