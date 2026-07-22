@@ -18,7 +18,7 @@ menubar — just an Eye that tells you how close you are at a glance.
 
 <br/>
 
-<img src="assets/demo.gif" alt="the mad-eye Eye going from calm to frantic to shattered in the menubar" width="340" />
+<img src="assets/demo.gif" alt="the mad-eye Eye and its popover going from calm to frantic to shattered, with Fable as the driving gauge" width="380" />
 
 </div>
 
