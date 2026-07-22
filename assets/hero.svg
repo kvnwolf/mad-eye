@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="mad-eye">
+  <defs>
+    <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e9e9ee"/>
+    </linearGradient>
+  </defs>
+  <!-- glass lens -->
+  <circle cx="50" cy="50" r="48" fill="url(#lens)"/>
+  <!-- bold ring -->
+  <circle cx="50" cy="50" r="43" fill="none" stroke="#26272b" stroke-width="10"/>
+  <!-- iris + pupil, offset for a sidelong Mad-Eye glance -->
+  <g transform="translate(5,-3)">
+    <circle cx="50" cy="50" r="13" fill="none" stroke="#d99a2e" stroke-width="3.5"/>
+    <circle cx="50" cy="50" r="6" fill="#26272b"/>
+    <circle cx="52.4" cy="47.6" r="1.8" fill="#fbfbfc"/>
+  </g>
+</svg>
