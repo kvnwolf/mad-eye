@@ -18,8 +18,8 @@ menubar — just an Eye that tells you how close you are at a glance.
 
 <br/>
 
-<!-- Add assets/demo.gif before launch — see assets/CAPTURE.md -->
-<img src="assets/demo.gif" alt="mad-eye animating in the menubar" width="640" />
+<!-- Demo GIF of the menubar Eye goes here once captured (needs a screen recording — see assets/CAPTURE.md). Add it and uncomment:
+<img src="assets/demo.gif" alt="mad-eye animating in the menubar" width="640" /> -->
 
 </div>
 
@@ -50,8 +50,7 @@ popover to make it the one that drives the Eye (it remembers your choice).
 | `100%` | 💥 **Shattered** | the ring cracks, the eye freezes |
 
 <div align="center">
-<!-- Add assets/popover.png before launch — see assets/CAPTURE.md -->
-<img src="assets/popover.png" alt="the popover with usage gauges" width="360" />
+<img src="assets/popover.png" alt="the mad-eye popover showing Claude usage gauges" width="400" />
 </div>
 
 ## Install
