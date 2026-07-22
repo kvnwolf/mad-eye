@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # macOS runner: the Rust core is macOS-only (security-framework, tray-icon,
+    # window-vibrancy) — it won't compile on Linux, so the `cargo test` extra needs macOS.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: bun install
+      # vite build → dist/, which lib.rs's `generate_context!()` embeds at compile
+      # time; without it the `cargo test` gate can't compile.
+      - run: bun run build
+      - run: bunx dobby check
