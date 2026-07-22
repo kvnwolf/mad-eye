@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#242530"/>
+      <stop offset="1" stop-color="#131418"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0.42" cy="0.36" r="0.78">
+      <stop offset="0" stop-color="#fdfdfe"/>
+      <stop offset="1" stop-color="#e3e3ea"/>
+    </radialGradient>
+  </defs>
+  <!-- macOS-style squircle tile -->
+  <rect x="80" y="80" width="864" height="864" rx="204" fill="url(#tile)"/>
+  <!-- glass lens -->
+  <circle cx="512" cy="512" r="292" fill="url(#lens)"/>
+  <!-- bold ring -->
+  <circle cx="512" cy="512" r="262" fill="none" stroke="#25262c" stroke-width="58"/>
+  <!-- iris + pupil, offset for a sidelong Mad-Eye glance -->
+  <g transform="translate(26,-16)">
+    <circle cx="512" cy="512" r="94" fill="none" stroke="#e0a23c" stroke-width="27"/>
+    <circle cx="512" cy="512" r="44" fill="#25262c"/>
+    <circle cx="529" cy="495" r="14" fill="#fdfdfe"/>
+  </g>
+</svg>

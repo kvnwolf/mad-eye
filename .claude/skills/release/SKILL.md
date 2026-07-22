@@ -7,7 +7,7 @@ argument-hint: "[patch|minor|major]"
 
 Cut ONE release of **mad-eye** (the macOS menubar app) to **GitHub Releases + a Homebrew cask**. Every step ends on a gate — a checkable condition; stop and report at the first gate that fails.
 
-Distribution is **unsigned/ad-hoc on purpose**: mad-eye uses `macOSPrivateApi` (the transparent + vibrancy Popover), which bars the Mac App Store, and its audience is Claude Code users (small, technical). So we ship a **Homebrew cask** — which strips the Gatekeeper quarantine flag on install, so an unsigned build installs clean — instead of paying for an Apple Developer ID + notarization. Graduate to signing only if it gets real traction. The app version lives in `src-tauri/tauri.conf.json` (`CFBundleVersion` derives from it); `package.json` + `src-tauri/Cargo.toml` mirror it in lockstep.
+Distribution is **unsigned/ad-hoc on purpose**: mad-eye uses `macOSPrivateApi` (the transparent + vibrancy Popover), which bars the Mac App Store, and its audience is Claude Code users (small, technical). So we ship an unsigned **Homebrew cask**: users install with `--no-quarantine` (or approve once via System Settings → Privacy & Security) because macOS Gatekeeper flags unsigned apps — cheaper than an Apple Developer ID + notarization, at the cost of that one-time friction. Graduate to signing only if it gets real traction. The app version lives in `src-tauri/tauri.conf.json` (`CFBundleVersion` derives from it); `package.json` + `src-tauri/Cargo.toml` mirror it in lockstep.
 
 **One-time setup** (before the FIRST release, else Step 1/3/5 gates fail): a GitHub remote exists (`git remote add origin …` + an initial push); both universal Rust targets installed (`rustup target add aarch64-apple-darwin x86_64-apple-darwin`); `gh` authenticated. The Homebrew tap (`kvnwolf/homebrew-tap`) and its cask are scaffolded by Step 5 on the first release if missing.
 
@@ -110,7 +110,7 @@ end
 
 ## Step 6: Smoke + report
 
-- Optional local smoke (skip if the user doesn't want it live-installed on this machine): `brew install --cask kvnwolf/tap/mad-eye` (add `--force` to reinstall over an existing copy) installs with NO Gatekeeper prompt — the cask strips the quarantine flag.
+- Optional local smoke (skip if the user doesn't want it live-installed on this machine): `brew install --cask --no-quarantine kvnwolf/tap/mad-eye` (add `--force` to reinstall over an existing copy) — `--no-quarantine` skips Gatekeeper so the unsigned app opens directly; without it macOS blocks the first launch.
 - Report to the user: version published, inferred bump + reasoning, DMG path + `sha256`, tag + GitHub release URL, cask commit URL, and the `brew install --cask kvnwolf/tap/mad-eye` command.
 
 ## Acceptance checklist
