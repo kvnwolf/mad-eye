@@ -16,7 +16,12 @@ A macOS menubar app showing Claude subscription usage limits (the /usage panel p
 ## Module map
 
 - `src-tauri/` — Rust core: the Eye, Agitation, usage fetching, Keychain.
-- `src/` — the Popover webview (vanilla TS).
+  - `src-tauri/src/eye/` — renders one Eye pose to a template tray icon ([CONTEXT](src-tauri/src/eye/CONTEXT.md)).
+  - `src-tauri/src/tray/` — builds the menubar Eye and toggles/positions the Popover it opens ([CONTEXT](src-tauri/src/tray/CONTEXT.md)).
+  - `src-tauri/src/usage/` — headless data core: fetch/parse the usage endpoint into Gauges, compute Driving Gauge + Mood + `Snapshot` ([CONTEXT](src-tauri/src/usage/CONTEXT.md)).
+  - `src-tauri/src/keychain/` — read Claude Code's OAuth credentials from the Keychain, read-only ([CONTEXT](src-tauri/src/keychain/CONTEXT.md)).
+- `src/` — the Popover webview (vanilla TS). `main.ts` bootstraps; `styles.css` is the dark panel theme.
+  - `src/popover/` — the Popover panel: renders a `Snapshot` (Rust-mirrored type + `mockSnapshot` for the dev URL) ([CONTEXT](src/popover/CONTEXT.md)).
 
 Each module gets its own CONTEXT.md (purpose · Files · Interface · Invariants · What's NOT here) as it is built.
 

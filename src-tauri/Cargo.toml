@@ -18,7 +18,18 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+# `macos-private-api` unlocks the transparent-window background API that the
+# frosted Popover needs (paired with `app.macOSPrivateApi` in tauri.conf.json).
+tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
+tauri-plugin-autostart = "2"
+# The native macOS vibrancy behind the Popover. Tauri 2.x already pins this exact
+# crate internally (it backs Tauri's own window effects), so depending on it here
+# adds no new transitive graph — it only lets us call `apply_vibrancy` directly
+# with the `Popover` material + corner radius.
+window-vibrancy = "0.6"
+tiny-skia = "0.12"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+ureq = "3"
+security-framework = "3"
 

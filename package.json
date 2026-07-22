@@ -18,7 +18,7 @@
 		]
 	},
 	"devDependencies": {
-		"@kvnwolf/dobby": "file:/Users/kvnwolf/conductor/workspaces/dobby/seville/cli",
+		"@kvnwolf/dobby": "link:@kvnwolf/dobby",
 		"@tauri-apps/cli": "^2",
 		"vite": "^8"
 	}

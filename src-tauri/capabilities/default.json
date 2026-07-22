@@ -1,7 +1,13 @@
 {
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
-	"description": "Capability for the main window",
-	"windows": ["main"],
-	"permissions": ["core:default"]
+	"description": "Capability for the Popover window: core defaults cover event listen and the get_snapshot command; set-size lets the webview hug the frosted window to its content; autostart permissions back the tray's Launch-at-login toggle.",
+	"windows": ["popover"],
+	"permissions": [
+		"core:default",
+		"core:window:allow-set-size",
+		"autostart:allow-enable",
+		"autostart:allow-disable",
+		"autostart:allow-is-enabled"
+	]
 }

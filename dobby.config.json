@@ -18,8 +18,8 @@
 	],
 	"checks": [
 		{
-			"name": "cargo check",
-			"run": "cargo check --manifest-path src-tauri/Cargo.toml"
+			"name": "cargo test",
+			"run": "cargo test --manifest-path src-tauri/Cargo.toml"
 		}
 	]
 }

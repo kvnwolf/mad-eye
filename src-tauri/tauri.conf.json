@@ -11,11 +11,19 @@
 	},
 	"app": {
 		"withGlobalTauri": true,
+		"macOSPrivateApi": true,
 		"windows": [
 			{
-				"title": "mad-eye",
-				"width": 800,
-				"height": 600
+				"label": "popover",
+				"url": "index.html",
+				"width": 360,
+				"height": 320,
+				"resizable": false,
+				"decorations": false,
+				"alwaysOnTop": true,
+				"visible": false,
+				"skipTaskbar": true,
+				"transparent": true
 			}
 		],
 		"security": {
