@@ -118,7 +118,8 @@ bun install
 bun tauri dev        # the native app: menubar Eye + popover
 ```
 
-Drive the Eye through every mood without burning real usage:
+Drive the Eye through every mood without burning real usage — the same value also
+seeds a coherent popover (Fable as the driving gauge), so screenshots match the Eye:
 
 ```sh
 MAD_EYE_FAKE_PCT=97 bun tauri dev    # 40 calm · 70 nervous · 90 paranoid · 97 frantic · 100 shattered

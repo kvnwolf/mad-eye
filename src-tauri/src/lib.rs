@@ -22,7 +22,7 @@ pub static QUIT: AtomicBool = AtomicBool::new(false);
 use keychain::read::read_claude_credentials;
 use usage::client::{fetch_usage, FetchError};
 use usage::mood::{driving_gauge, mood_for};
-use usage::types::{Snapshot, Status};
+use usage::types::{Gauge, GaugeKind, Snapshot, Status};
 
 /// Poll floor (Decision / Spec): never fetch more often than this to stay under
 /// the endpoint's rate limit.
@@ -180,18 +180,29 @@ pub fn run() {
                 }
             }
 
-            // Startup state: the Eye is asleep until the first successful fetch.
-            // Seed the Driving-Gauge selection from disk so a prior choice persists.
+            // Startup state. Seed the Driving-Gauge selection from disk so a prior
+            // choice persists. DEMO MODE: when `MAD_EYE_FAKE_PCT` is set, seed a
+            // coherent fake Snapshot (gauges that line up with the faked Eye's
+            // Mood) and skip the poll, so a screenshot/recording shows the Popover
+            // numbers matching the Eye. Otherwise the Eye is asleep until the first
+            // successful fetch.
             let selected_driver = load_driver(app.handle());
+            let demo = demo_pct();
             app.manage(AppState {
-                snapshot: Mutex::new(Snapshot::asleep()),
+                snapshot: Mutex::new(match demo {
+                    Some(pct) => demo_snapshot(pct),
+                    None => Snapshot::asleep(),
+                }),
                 fail_count: Mutex::new(0),
                 selected_driver: Mutex::new(selected_driver),
             });
 
-            // Headless poll loop: first tick immediate, then every 180s.
-            let handle = app.handle().clone();
-            thread::spawn(move || poll_loop(handle));
+            // Headless poll loop: first tick immediate, then every 180s — skipped
+            // in demo mode so the fake Snapshot stands.
+            if demo.is_none() {
+                let handle = app.handle().clone();
+                thread::spawn(move || poll_loop(handle));
+            }
 
             // Animate the Eye: a background thread reads AppState.snapshot each
             // cycle and darts the pupil by Mood. Managed so it outlives setup.
@@ -398,4 +409,91 @@ fn now_millis() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|elapsed| elapsed.as_millis() as i64)
         .unwrap_or(0)
+}
+
+/// Demo/screenshot override: the faked Driving-Gauge percent from
+/// `MAD_EYE_FAKE_PCT`, when it parses. In demo mode both the Eye's Mood (via the
+/// animator) and the Popover's gauges (via [`demo_snapshot`]) derive from it, so a
+/// recording shows the numbers matching the Eye. `None` in normal operation.
+fn demo_pct() -> Option<f64> {
+    std::env::var("MAD_EYE_FAKE_PCT")
+        .ok()
+        .and_then(|raw| raw.trim().parse::<f64>().ok())
+}
+
+/// A coherent fake Snapshot for demo mode: the Weekly·Fable gauge is the selected
+/// driver and carries `pct`, so its bar and the faked Eye's Mood climb together;
+/// Session + the all-models week stay fixed and calm so the story reads "you're
+/// watching Fable and it's the one heating up". Seeded at startup only when
+/// `MAD_EYE_FAKE_PCT` is set (the poll is then skipped so it stands). Never used in
+/// normal operation.
+fn demo_snapshot(pct: f64) -> Snapshot {
+    let pctf = |v: f64| v.clamp(0.0, 100.0).round();
+    let gauges = vec![
+        Gauge {
+            name: "Session".into(),
+            kind: GaugeKind::Session,
+            utilization: 24.0,
+            resets_at: iso_in(2 * 3_600_000 + 45 * 60_000),
+        },
+        Gauge {
+            name: "Weekly · all models".into(),
+            kind: GaugeKind::WeeklyAll,
+            utilization: 47.0,
+            resets_at: iso_in(5 * 3_600_000 + 10 * 60_000),
+        },
+        Gauge {
+            name: "Weekly · Fable".into(),
+            kind: GaugeKind::WeeklyScoped,
+            utilization: pctf(pct),
+            resets_at: iso_in(5 * 3_600_000 + 40 * 60_000),
+        },
+    ];
+    Snapshot {
+        plan: None,
+        gauges,
+        driving_idx: Some(2),
+        mood: Some(mood_for(pct)),
+        status: Status::Normal,
+        status_note: None,
+        retry_at: None,
+        fetched_at: Some(now_millis() - 60_000),
+    }
+}
+
+/// ISO-8601 UTC instant `offset_ms` from now.
+fn iso_in(offset_ms: i64) -> String {
+    iso_from_millis(now_millis() + offset_ms)
+}
+
+/// Format epoch millis as an ISO-8601 UTC instant, by hand.
+// ponytail: hand-rolled epoch→ISO (Hinnant civil-from-days) so one demo timestamp
+// doesn't pull in a date crate. Swap for chrono/jiff if real date math ever lands.
+fn iso_from_millis(ms: i64) -> String {
+    let secs = ms.div_euclid(1000);
+    let days = secs.div_euclid(86_400);
+    let tod = secs.rem_euclid(86_400);
+    let (hh, mm, ss) = (tod / 3600, (tod % 3600) / 60, tod % 60);
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!("{year:04}-{month:02}-{day:02}T{hh:02}:{mm:02}:{ss:02}Z")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::iso_from_millis;
+
+    #[test]
+    fn iso_from_millis_matches_known_instants() {
+        assert_eq!(iso_from_millis(0), "1970-01-01T00:00:00Z");
+        assert_eq!(iso_from_millis(1_000_000_000_000), "2001-09-09T01:46:40Z");
+        assert_eq!(iso_from_millis(1_609_459_200_000), "2021-01-01T00:00:00Z");
+    }
 }
