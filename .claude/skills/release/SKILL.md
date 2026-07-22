@@ -90,7 +90,7 @@ cask "mad-eye" do
   desc "Menubar Eye tracking Claude subscription usage"
   homepage "https://github.com/kvnwolf/mad-eye"
 
-  depends_on macos: ">= :monterey"
+  depends_on macos: :monterey
 
   app "mad-eye.app"
 
