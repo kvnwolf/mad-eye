@@ -62,12 +62,12 @@ popover to make it the one that drives the Eye (it remembers your choice).
 ### Homebrew (recommended)
 
 ```sh
-brew install --cask --no-quarantine kvnwolf/tap/mad-eye
+brew install --cask kvnwolf/tap/mad-eye && xattr -dr com.apple.quarantine /Applications/mad-eye.app
 ```
 
-`--no-quarantine` skips Gatekeeper's quarantine so the app opens straight away — reasonable for an
-open-source tool whose [source you can read](src-tauri/src). Prefer to keep the check? Install
-without the flag, then approve it once under **System Settings → Privacy & Security → Open Anyway**.
+The `xattr` half clears the Gatekeeper quarantine so the unsigned app opens — Homebrew can't skip it,
+and the [source is right here to audit](src-tauri/src). Prefer clicking? Install with just the `brew`
+half, then approve mad-eye under **System Settings → Privacy & Security → Open Anyway**.
 
 ### Manual
 
