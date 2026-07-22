@@ -18,8 +18,7 @@ menubar — just an Eye that tells you how close you are at a glance.
 
 <br/>
 
-<!-- Demo GIF of the menubar Eye goes here once captured (needs a screen recording — see assets/CAPTURE.md). Add it and uncomment:
-<img src="assets/demo.gif" alt="mad-eye animating in the menubar" width="640" /> -->
+<img src="assets/demo.gif" alt="the mad-eye Eye going from calm to frantic to shattered in the menubar" width="340" />
 
 </div>
 
