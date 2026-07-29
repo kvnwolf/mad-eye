@@ -13,6 +13,8 @@ A macOS menubar app showing Claude subscription usage limits (the /usage panel p
 
 **Dev**: the web side runs via `dobby up` / `dobby dev` — dobby infers the dev command and wraps it in portless, so do NOT pin a dev command or hardcode a dev URL here. The NATIVE app (menubar Eye, real tray behavior) runs via `bun tauri dev`, which boots Vite itself on the fixed port 1420 that `src-tauri/tauri.conf.json` expects.
 
+**Release**: `./scripts/release-mac.sh` builds the universal DMG, signs it with the Developer ID identity, notarizes it via the `mad-eye-notary` Keychain credential profile, and staples the ticket (ADR 0005). Releases are built locally only — CI never runs `tauri build`.
+
 ## Module map
 
 - `src-tauri/` — Rust core: the Eye, Agitation, usage fetching, Keychain.

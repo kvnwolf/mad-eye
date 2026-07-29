@@ -1,25 +1,25 @@
 {
-	"name": "mad-eye",
-	"private": true,
-	"version": "0.1.1",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "vite build",
-		"preview": "vite preview",
-		"tauri": "tauri"
-	},
-	"dependencies": {
-		"@tauri-apps/api": "^2"
-	},
-	"knip": {
-		"ignoreDependencies": [
-			"@kvnwolf/dobby"
-		]
-	},
-	"devDependencies": {
-		"@kvnwolf/dobby": "^0.2.0",
-		"@tauri-apps/cli": "^2",
-		"vite": "^8"
-	}
+  "name": "mad-eye",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "knip": {
+    "ignoreDependencies": [
+      "@kvnwolf/dobby"
+    ]
+  },
+  "devDependencies": {
+    "@kvnwolf/dobby": "^0.3.2",
+    "@tauri-apps/cli": "^2",
+    "vite": "^8"
+  }
 }

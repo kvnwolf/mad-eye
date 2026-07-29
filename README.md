@@ -54,28 +54,20 @@ popover to make it the one that drives the Eye (it remembers your choice).
 
 ## Install
 
-> mad-eye isn't code-signed yet (free, unsigned build), so macOS Gatekeeper flags it on first
-> launch. Both paths below get you past that.
+> Releases from v0.2.0 on are signed with a Developer ID certificate and notarized by Apple, so
+> Gatekeeper opens them cleanly — no workarounds. (Older releases were unsigned; for those, approve
+> under **System Settings → Privacy & Security → Open Anyway**.)
 
 ### Homebrew (recommended)
 
 ```sh
-brew install --cask kvnwolf/tap/mad-eye && xattr -dr com.apple.quarantine /Applications/mad-eye.app
+brew install --cask kvnwolf/tap/mad-eye
 ```
-
-The `xattr` half clears the Gatekeeper quarantine so the unsigned app opens — Homebrew can't skip it,
-and the [source is right here to audit](src-tauri/src). Prefer clicking? Install with just the `brew`
-half, then approve mad-eye under **System Settings → Privacy & Security → Open Anyway**.
 
 ### Manual
 
 Download `mad-eye_<version>_universal.dmg` from [**Releases**](https://github.com/kvnwolf/mad-eye/releases),
-open it, and drag **mad-eye** into Applications. Then approve it under **System Settings → Privacy &
-Security → Open Anyway**, or clear the quarantine flag yourself:
-
-```sh
-xattr -dr com.apple.quarantine /Applications/mad-eye.app
-```
+open it, and drag **mad-eye** into Applications.
 
 ## Requirements
 

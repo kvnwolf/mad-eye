@@ -17,6 +17,8 @@ function, security-framework hidden behind it.
 ## Invariants
 
 - READ-ONLY. Never writes or refreshes the token (Decision #4 — rotation would break Claude Code's own login).
+- The two-Keychain-items gotcha: TWO items can share the `Claude Code-credentials` service (a stale one from an old login plus the live one). We read by account `$USER`, which selects the live item Claude Code keeps updating in place.
+- Reading this item needs a per-app Keychain ACL grant ("Always Allow"), bound to the app's code signature. Every build must carry the stable signing identity (ADR 0004: cargo runner re-signs dev builds; `signingIdentity` covers bundles) or the prompt returns on the next 180s poll after a rebuild.
 - The token VALUE is never logged or exposed beyond the fetch layer.
 - Parses DEFENSIVELY: only `accessToken` is required; `expiresAt` / `subscriptionType` are best-effort (the blob shape varies by Claude Code version).
 - The `security-framework` crate is a hidden adapter — the interface is one function; a CLI shell-out could replace it without callers changing.

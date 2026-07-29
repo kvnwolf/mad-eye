@@ -1,4 +1,4 @@
 {
-	"extends": "@kvnwolf/dobby/tsconfig/vite",
-	"include": ["src"]
+  "extends": "@kvnwolf/dobby/tsconfig/vite",
+  "include": ["src"]
 }

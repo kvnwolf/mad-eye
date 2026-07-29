@@ -16,32 +16,32 @@ type GaugeKind = "session" | "weeklyAll" | "weeklyScoped";
 
 /** One usage-limit reading: percent used plus when its window resets. */
 export interface Gauge {
-	/** Human label, already localized upstream (e.g. "Weekly · Fable"). */
-	name: string;
-	kind: GaugeKind;
-	/** Percent used, 0–100. */
-	utilization: number;
-	/** ISO-8601 instant the window resets. */
-	resetsAt: string;
+  kind: GaugeKind;
+  /** Human label, already localized upstream (e.g. "Weekly · Fable"). */
+  name: string;
+  /** ISO-8601 instant the window resets. */
+  resetsAt: string;
+  /** Percent used, 0–100. */
+  utilization: number;
 }
 
 /** Everything the Popover needs to draw one frame. */
 export interface Snapshot {
-	/** Plan label (e.g. "Max 20x"), or null when unknown. */
-	plan: string | null;
-	gauges: Gauge[];
-	/** Index into `gauges` of the Gauge that drives the Eye, or null. */
-	drivingIdx: number | null;
-	mood: Mood | null;
-	status: Status;
-	/** Human reason for a non-normal status: the stale warning ("rate limited",
-	 * "offline") or the blind cause ("session expired"). null when normal. */
-	statusNote: string | null;
-	/** Epoch ms when a rate-limited retry is allowed (from the 429 Retry-After);
-	 * drives the live countdown + the disabled Refresh. null unless rate-limited. */
-	retryAt: number | null;
-	/** Epoch ms of the last successful fetch, or null before the first one. */
-	fetchedAt: number | null;
+  /** Index into `gauges` of the Gauge that drives the Eye, or null. */
+  drivingIdx: number | null;
+  /** Epoch ms of the last successful fetch, or null before the first one. */
+  fetchedAt: number | null;
+  gauges: Gauge[];
+  mood: Mood | null;
+  /** Plan label (e.g. "Max 20x"), or null when unknown. */
+  plan: string | null;
+  /** Epoch ms when a rate-limited retry is allowed (from the 429 Retry-After);
+   * drives the live countdown + the disabled Refresh. null unless rate-limited. */
+  retryAt: number | null;
+  status: Status;
+  /** Human reason for a non-normal status: the stale warning ("rate limited",
+   * "offline") or the blind cause ("session expired"). null when normal. */
+  statusNote: string | null;
 }
 
 const MINUTE = 60 * 1000;
@@ -49,33 +49,33 @@ const HOUR = 60 * MINUTE;
 
 /** ISO string for `ms` from now — keeps the mock's countdowns live. */
 function isoIn(ms: number): string {
-	return new Date(Date.now() + ms).toISOString();
+  return new Date(Date.now() + ms).toISOString();
 }
 
 /** The representative gauge set the normal/stale/blind mocks share — mirrors the
  * real `limits[]` shape: one session gauge plus the all-models and Fable (scoped)
  * weeklies, values from a live 2026-07-22 response (26 / 13 / 9). */
 function sampleGauges(): Gauge[] {
-	return [
-		{
-			name: "Session",
-			kind: "session",
-			utilization: 26,
-			resetsAt: isoIn(2 * HOUR + 45 * MINUTE),
-		},
-		{
-			name: "Weekly · all models",
-			kind: "weeklyAll",
-			utilization: 13,
-			resetsAt: isoIn(5 * HOUR + 10 * MINUTE),
-		},
-		{
-			name: "Weekly · Fable",
-			kind: "weeklyScoped",
-			utilization: 9,
-			resetsAt: isoIn(5 * HOUR + 40 * MINUTE),
-		},
-	];
+  return [
+    {
+      kind: "session",
+      name: "Session",
+      resetsAt: isoIn(2 * HOUR + 45 * MINUTE),
+      utilization: 26,
+    },
+    {
+      kind: "weeklyAll",
+      name: "Weekly · all models",
+      resetsAt: isoIn(5 * HOUR + 10 * MINUTE),
+      utilization: 13,
+    },
+    {
+      kind: "weeklyScoped",
+      name: "Weekly · Fable",
+      resetsAt: isoIn(5 * HOUR + 40 * MINUTE),
+      utilization: 9,
+    },
+  ];
 }
 
 /**
@@ -85,11 +85,19 @@ function sampleGauges(): Gauge[] {
  * <100 frantic · >=100 shattered.
  */
 export function mockMoodFor(pct: number): Mood {
-	if (pct < 50) return "calm";
-	if (pct < 80) return "nervous";
-	if (pct < 95) return "paranoid";
-	if (pct < 100) return "frantic";
-	return "shattered";
+  if (pct < 50) {
+    return "calm";
+  }
+  if (pct < 80) {
+    return "nervous";
+  }
+  if (pct < 95) {
+    return "paranoid";
+  }
+  if (pct < 100) {
+    return "frantic";
+  }
+  return "shattered";
 }
 
 /**
@@ -99,63 +107,63 @@ export function mockMoodFor(pct: number): Mood {
  * gauge in the browser demo re-points `drivingIdx` (see main.ts + mockMoodFor).
  */
 export function mockSnapshot(state: Status): Snapshot {
-	switch (state) {
-		case "normal":
-			return {
-				plan: "Max 20x",
-				gauges: sampleGauges(),
-				drivingIdx: 0,
-				mood: "calm",
-				status: "normal",
-				statusNote: null,
-				retryAt: null,
-				fetchedAt: Date.now() - 60 * 1000,
-			};
-		case "stale":
-			return {
-				plan: "Max 20x",
-				gauges: sampleGauges(),
-				drivingIdx: 0,
-				mood: "calm",
-				status: "stale",
-				statusNote: "rate limited",
-				retryAt: Date.now() + 2 * MINUTE + 7 * 1000,
-				fetchedAt: Date.now() - 8 * MINUTE,
-			};
-		case "blind":
-			// Blind keeps the last known plan/gauges, but the render shows only
-			// the cause — the Eye can't see, so the numbers are untrustworthy.
-			return {
-				plan: "Max 20x",
-				gauges: sampleGauges(),
-				drivingIdx: 0,
-				mood: null,
-				status: "blind",
-				statusNote: "session expired",
-				retryAt: null,
-				fetchedAt: Date.now() - 12 * MINUTE,
-			};
-		case "asleep":
-			return {
-				plan: null,
-				gauges: [],
-				drivingIdx: null,
-				mood: null,
-				status: "asleep",
-				statusNote: null,
-				retryAt: null,
-				fetchedAt: null,
-			};
-		default:
-			return {
-				plan: null,
-				gauges: [],
-				drivingIdx: null,
-				mood: null,
-				status: "asleep",
-				statusNote: null,
-				retryAt: null,
-				fetchedAt: null,
-			};
-	}
+  switch (state) {
+    case "normal":
+      return {
+        drivingIdx: 0,
+        fetchedAt: Date.now() - 60 * 1000,
+        gauges: sampleGauges(),
+        mood: "calm",
+        plan: "Max 20x",
+        retryAt: null,
+        status: "normal",
+        statusNote: null,
+      };
+    case "stale":
+      return {
+        drivingIdx: 0,
+        fetchedAt: Date.now() - 8 * MINUTE,
+        gauges: sampleGauges(),
+        mood: "calm",
+        plan: "Max 20x",
+        retryAt: Date.now() + 2 * MINUTE + 7 * 1000,
+        status: "stale",
+        statusNote: "rate limited",
+      };
+    case "blind":
+      // Blind keeps the last known plan/gauges, but the render shows only
+      // the cause — the Eye can't see, so the numbers are untrustworthy.
+      return {
+        drivingIdx: 0,
+        fetchedAt: Date.now() - 12 * MINUTE,
+        gauges: sampleGauges(),
+        mood: null,
+        plan: "Max 20x",
+        retryAt: null,
+        status: "blind",
+        statusNote: "session expired",
+      };
+    case "asleep":
+      return {
+        drivingIdx: null,
+        fetchedAt: null,
+        gauges: [],
+        mood: null,
+        plan: null,
+        retryAt: null,
+        status: "asleep",
+        statusNote: null,
+      };
+    default:
+      return {
+        drivingIdx: null,
+        fetchedAt: null,
+        gauges: [],
+        mood: null,
+        plan: null,
+        retryAt: null,
+        status: "asleep",
+        statusNote: null,
+      };
+  }
 }

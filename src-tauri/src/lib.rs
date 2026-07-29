@@ -81,6 +81,22 @@ fn set_driver(app: AppHandle, state: tauri::State<AppState>, name: Option<String
     let _ = app.emit("snapshot-updated", &snapshot);
 }
 
+/// The Popover's version stamp: the app version plus whether this is a dev
+/// build (debug profile), so the footer can show "v0.1.1" with a DEV badge.
+#[derive(Serialize)]
+struct VersionInfo {
+    version: String,
+    dev: bool,
+}
+
+#[tauri::command]
+fn app_version(app: AppHandle) -> VersionInfo {
+    VersionInfo {
+        version: app.package_info().version.to_string(),
+        dev: cfg!(debug_assertions),
+    }
+}
+
 /// The on-disk shape of the persisted Driving-Gauge selection: `{ "driver": <name> | null }`.
 #[derive(Serialize, Deserialize)]
 struct DriverConfig {
@@ -124,7 +140,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
             refresh_now_cmd,
-            set_driver
+            set_driver,
+            app_version
         ])
         // Hide-on-blur: whenever the Popover loses focus (a click elsewhere, the
         // tray, Cmd-Tab), tuck it away and stamp the last-hide time so the very
