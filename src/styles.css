@@ -6,38 +6,38 @@
  */
 
 :root {
-	/* The card fills the transparent, frosted OS window edge-to-edge — its width
+  /* The card fills the transparent, frosted OS window edge-to-edge — its width
 	   is owned by tauri.conf.json + src/main.ts (setSize), not CSS. macOS vibrancy
 	   (window_vibrancy, material Popover) supplies the frosted backdrop, rounded
 	   corners and drop-shadow; the card only lays a translucent dark tint on top
 	   so the light text stays legible over the frost. Tune --card-tint's alpha to
 	   trade legibility (more opaque) against frostiness (more transparent). */
-	--card-tint: rgba(28, 29, 32, 0.66);
-	--edge: rgba(255, 255, 255, 0.09);
-	--rule: rgba(255, 255, 255, 0.07);
-	/* The card's top-edge highlight and the muted blind Eye — kept as variables
+  --card-tint: rgba(28, 29, 32, 0.66);
+  --edge: rgba(255, 255, 255, 0.09);
+  --rule: rgba(255, 255, 255, 0.07);
+  /* The card's top-edge highlight and the muted blind Eye — kept as variables
 	   so the light-theme block below can flip them without a cascade fight. */
-	--card-highlight: rgba(255, 255, 255, 0.04);
-	--eye-muted: rgba(255, 255, 255, 0.26);
+  --card-highlight: rgba(255, 255, 255, 0.04);
+  --eye-muted: rgba(255, 255, 255, 0.26);
 
-	--text: #e9eaee;
-	--text-2: #c3c7cf;
-	--text-3: #8b909b;
-	--text-4: #6d727c;
+  --text: #e9eaee;
+  --text-2: #c3c7cf;
+  --text-3: #8b909b;
+  --text-4: #6d727c;
 
-	--track: rgba(255, 255, 255, 0.08);
-	--fill: #6b7686;
-	--accent: #e0a23c;
-	--accent-dim: #c79a52;
-	--accent-text: #e8b465;
+  --track: rgba(255, 255, 255, 0.08);
+  --fill: #6b7686;
+  --accent: #e0a23c;
+  --accent-dim: #c79a52;
+  --accent-text: #e8b465;
 
-	--radius: 12px;
-	--bar-h: 6px;
+  --radius: 12px;
+  --bar-h: 6px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter,
+    system-ui, sans-serif;
 
-	color-scheme: dark;
-	font-family:
-		-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter,
-		system-ui, sans-serif;
+  color-scheme: dark;
 }
 
 /* Light theme. The native window vibrancy (material Popover) already flips to a
@@ -46,34 +46,34 @@
    Dark (the :root block above) stays the default. Everything downstream reads
    these variables, so no per-rule light overrides are needed. */
 @media (prefers-color-scheme: light) {
-	:root {
-		--card-tint: rgba(252, 252, 253, 0.55);
-		--edge: rgba(0, 0, 0, 0.08);
-		--rule: rgba(0, 0, 0, 0.09);
-		--card-highlight: rgba(255, 255, 255, 0.6);
-		--eye-muted: rgba(0, 0, 0, 0.3);
+  :root {
+    --card-tint: rgba(252, 252, 253, 0.55);
+    --edge: rgba(0, 0, 0, 0.08);
+    --rule: rgba(0, 0, 0, 0.09);
+    --card-highlight: rgba(255, 255, 255, 0.6);
+    --eye-muted: rgba(0, 0, 0, 0.3);
 
-		--text: #1b1c1f;
-		--text-2: #33363c;
-		--text-3: #595e69;
-		--text-4: #838791;
+    --text: #1b1c1f;
+    --text-2: #33363c;
+    --text-3: #595e69;
+    --text-4: #838791;
 
-		--track: rgba(0, 0, 0, 0.09);
-		--fill: #7e8794;
-		--accent: #cf8a1f;
-		--accent-dim: #a17636;
-		--accent-text: #966611;
+    --track: rgba(0, 0, 0, 0.09);
+    --fill: #7e8794;
+    --accent: #cf8a1f;
+    --accent-dim: #a17636;
+    --accent-text: #966611;
 
-		color-scheme: light;
-	}
+    color-scheme: light;
+  }
 }
 
 *,
 *::before,
 *::after {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 /* Transparent all the way down so the OS vibrancy shows through: the old opaque
@@ -83,164 +83,164 @@
 html,
 body,
 #app {
-	background: transparent;
+  background: transparent;
 }
 
 body {
-	color: var(--text);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text);
+  text-rendering: optimizeLegibility;
 }
 
 #app {
-	width: 100%;
+  width: 100%;
 }
 
 /* --- Panel ---------------------------------------------------------------- */
 
 .popover {
-	/* Fill the frosted window edge-to-edge; radius matches the vibrancy corner
+  /* Fill the frosted window edge-to-edge; radius matches the vibrancy corner
 	   radius (12px) so the card and the frost line up. No drop-shadow — the OS
 	   window already casts one — just a hairline top highlight to catch the edge. */
-	width: 100%;
-	background: var(--card-tint);
-	border: 1px solid var(--edge);
-	border-radius: var(--radius);
-	padding: 14px 16px 12px;
-	box-shadow: 0 1px 0 var(--card-highlight) inset;
-	font-size: 13px;
-	line-height: 1.35;
+  width: 100%;
+  padding: 14px 16px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: var(--card-tint);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 var(--card-highlight) inset;
 }
 
 /* --- Gauges --------------------------------------------------------------- */
 
 .gauges {
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
 }
 
 /* Every gauge row is a click/keyboard target: activating it makes that Gauge
    drive the Eye. Padding + a bleed into the card's side padding give the hover
    highlight room; the pointer cursor advertises that the row is clickable. */
 .gauge {
-	padding: 6px 8px;
-	margin: 0 -8px;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: background 0.15s ease;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
 
 .gauge:hover {
-	background: var(--track);
+  background: var(--track);
 }
 
 .gauge:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: -1px;
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 
 .gauge__top {
-	display: flex;
-	align-items: baseline;
-	justify-content: space-between;
-	gap: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .gauge__name {
-	color: var(--text-2);
-	font-weight: 450;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 450;
+  color: var(--text-2);
+  white-space: nowrap;
 }
 
 .gauge__pct {
-	color: var(--text-3);
-	font-size: 12px;
-	font-variant-numeric: tabular-nums;
-	flex: none;
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
 }
 
 .gauge__track {
-	height: var(--bar-h);
-	margin: 6px 0 5px;
-	background: var(--track);
-	border-radius: 999px;
-	overflow: hidden;
+  height: var(--bar-h);
+  margin: 6px 0 5px;
+  overflow: hidden;
+  background: var(--track);
+  border-radius: 999px;
 }
 
 .gauge__fill {
-	height: 100%;
-	min-width: 3px;
-	background: var(--fill);
-	border-radius: 999px;
-	transition: width 0.3s ease;
+  min-width: 3px;
+  height: 100%;
+  background: var(--fill);
+  border-radius: 999px;
+  transition: width 0.3s ease;
 }
 
 .gauge__meta {
-	display: flex;
-	align-items: baseline;
-	justify-content: space-between;
-	gap: 12px;
-	font-size: 11px;
-	color: var(--text-4);
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-4);
 }
 
 /* The driving Gauge — the one that moves the Eye — carries the accent and a faint
    amber wash so it reads as the active selection. */
 .gauge--driving {
-	background: color-mix(in srgb, var(--accent) 10%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 /* Placed after `.gauge:hover` so it wins on a hovered driving row (equal
    specificity, later source) — the row stays amber rather than turning grey. */
 .gauge--driving:hover {
-	background: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .gauge--driving .gauge__name {
-	color: var(--accent-text);
-	font-weight: 500;
+  font-weight: 500;
+  color: var(--accent-text);
 }
 
 .gauge--driving .gauge__pct {
-	color: var(--accent-text);
+  color: var(--accent-text);
 }
 
 .gauge--driving .gauge__fill {
-	background: var(--accent);
+  background: var(--accent);
 }
 
 /* The driving Gauge's "👁 watching" badge — small, amber, right-aligned in the
    meta row (replaces the old "moves the Eye" text). */
 .gauge__driver {
-	flex: none;
-	display: inline-flex;
-	align-items: center;
-	gap: 3px;
-	color: var(--accent-text);
-	font-weight: 500;
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+  align-items: center;
+  font-weight: 500;
+  color: var(--accent-text);
 }
 
 /* Non-driving rows: a faint "track" hint, hidden until the row is hovered or
    focused, so it's discoverable that activating the row makes this Gauge drive
    the Eye. */
 .gauge__hint {
-	flex: none;
-	display: inline-flex;
-	align-items: center;
-	gap: 3px;
-	color: var(--text-4);
-	opacity: 0;
-	transition: opacity 0.15s ease;
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+  align-items: center;
+  color: var(--text-4);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .gauge:hover .gauge__hint,
 .gauge:focus-visible .gauge__hint {
-	opacity: 1;
+  opacity: 1;
 }
 
 /* --- Controls (every state) ----------------------------------------------- */
@@ -249,110 +249,126 @@ body {
    Refresh is the only in-Popover control now — Launch at login and Quit moved to
    the tray's right-click context menu. */
 .popover__controls {
-	margin-top: 14px;
-	padding-top: 10px;
-	border-top: 1px solid var(--rule);
+  padding-top: 10px;
+  margin-top: 14px;
+  border-top: 1px solid var(--rule);
 }
 
 /* "updated X ago" (+ stale hint) on the left, the Refresh button pushed far
    right. */
 .popover__footer {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 11px;
-	color: var(--text-4);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-4);
+}
+
+/* The app-version stamp next to "updated ago"; the DEV badge only appears on
+   debug builds so a dev instance is tellable at a glance. */
+.popover__version {
+  flex: none;
+  color: var(--text-4);
+}
+
+.popover__dev {
+  flex: none;
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-text);
+  letter-spacing: 0.08em;
+  background: rgb(224 162 60 / 12%);
+  border-radius: 4px;
 }
 
 /* Stale warning banner: transient failure (rate limit / offline / 5xx) — the
    numbers are the last good read. Amber, calm-but-clear, above the gauges. */
 .popover__warning {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 2px 0 10px;
-	padding: 7px 10px;
-	border-radius: 8px;
-	background: color-mix(in srgb, var(--accent) 14%, transparent);
-	color: var(--accent-text);
-	font-size: 12px;
-	line-height: 1.2;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  margin: 2px 0 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 8px;
 }
 
 .popover__warning-icon {
-	flex: none;
-	font-size: 12px;
-	line-height: 1;
+  flex: none;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .popover__warning-text {
-	font-weight: 500;
+  font-weight: 500;
 }
 
 .popover__refresh {
-	margin-left: auto;
-	flex: none;
-	/* Flex-centre the 15×15 icon box in a fixed square so the icon sits
-	   dead-centre (no padding to pull it off). */
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 22px;
-	height: 22px;
-	padding: 0;
-	border: none;
-	border-radius: 6px;
-	background: transparent;
-	color: var(--text-3);
-	cursor: pointer;
-	transition:
-		background 0.15s ease,
-		color 0.15s ease,
-		transform 0.1s ease;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin-left: auto;
+  color: var(--text-3);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .popover__refresh:hover {
-	background: var(--track);
-	color: var(--text);
+  color: var(--text);
+  background: var(--track);
 }
 
 .popover__refresh:active {
-	transform: scale(0.92);
+  transform: scale(0.92);
 }
 
 .popover__refresh:disabled {
-	cursor: default;
+  cursor: default;
 }
 
 /* Rate-limit cooldown: disabled and dimmed (a manual retry would just 429). The
    banner countdown says when it re-enables. */
 .popover__refresh.is-cooldown {
-	opacity: 0.35;
+  opacity: 0.35;
 }
 
 /* A centred inline-SVG icon (not a text glyph, whose ink rode off its baseline):
    the button flex-centres this 15×15 box, and the icon is centred in its own
    viewBox, so it sits dead-centre and spins around its own centre. */
 .popover__refresh-glyph {
-	display: block;
-	width: 15px;
-	height: 15px;
-	transform-origin: center;
+  display: block;
+  width: 15px;
+  height: 15px;
+  transform-origin: center;
 }
 
 /* Refreshing: spin the icon in place and read the button as busy. */
 .popover__refresh.is-refreshing {
-	opacity: 0.7;
+  opacity: 0.7;
 }
 
 .popover__refresh.is-refreshing .popover__refresh-glyph {
-	animation: madeye-spin 0.8s linear infinite;
+  animation: madeye-spin 0.8s linear infinite;
 }
 
 @keyframes madeye-spin {
-	to {
-		transform: rotate(1turn);
-	}
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 /* --- Blind ---------------------------------------------------------------- */
@@ -361,85 +377,85 @@ body {
    the "updated ago" line + Refresh read correctly). The panel keeps its default
    padding. */
 .blind {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	gap: 10px;
-	padding: 14px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 12px 8px;
+  text-align: center;
 }
 
 .blind__eye {
-	color: var(--eye-muted);
+  color: var(--eye-muted);
 }
 
 .blind__title {
-	color: var(--text-2);
-	font-weight: 500;
+  font-weight: 500;
+  color: var(--text-2);
 }
 
 .blind__cause {
-	color: var(--text-3);
-	font-size: 12px;
+  font-size: 12px;
+  color: var(--text-3);
 }
 
 /* --- Skeleton (asleep) — pulsing DATA bars only, no numbers ---------------- */
 
 .skeleton {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
-	padding: 4px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0 2px;
 }
 
 .skeleton__row {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .skeleton__label {
-	width: 38%;
-	height: 9px;
-	border-radius: 4px;
-	background: var(--track);
-	animation: madeye-pulse 1.4s ease-in-out infinite;
+  width: 38%;
+  height: 9px;
+  background: var(--track);
+  border-radius: 4px;
+  animation: madeye-pulse 1.4s ease-in-out infinite;
 }
 
 .skeleton__bar {
-	height: var(--bar-h);
-	border-radius: 999px;
-	background: var(--track);
-	animation: madeye-pulse 1.4s ease-in-out infinite;
+  height: var(--bar-h);
+  background: var(--track);
+  border-radius: 999px;
+  animation: madeye-pulse 1.4s ease-in-out infinite;
 }
 
 @keyframes madeye-pulse {
-	0%,
-	100% {
-		opacity: 0.35;
-	}
-	50% {
-		opacity: 0.75;
-	}
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.gauge,
-	.gauge__fill,
-	.gauge__hint,
-	.popover__refresh {
-		transition: none;
-	}
+  .gauge,
+  .gauge__fill,
+  .gauge__hint,
+  .popover__refresh {
+    transition: none;
+  }
 
-	/* No spin under reduced motion — the dimmed, disabled button still signals
+  /* No spin under reduced motion — the dimmed, disabled button still signals
 	   "refreshing". */
-	.popover__refresh.is-refreshing .popover__refresh-glyph {
-		animation: none;
-	}
+  .popover__refresh.is-refreshing .popover__refresh-glyph {
+    animation: none;
+  }
 
-	.skeleton__label,
-	.skeleton__bar {
-		animation: none;
-		opacity: 0.5;
-	}
+  .skeleton__label,
+  .skeleton__bar {
+    opacity: 0.5;
+    animation: none;
+  }
 }

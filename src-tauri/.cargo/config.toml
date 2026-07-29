@@ -1,0 +1,11 @@
+# Dev binaries are ad-hoc signed (designated requirement = cdhash of the exact
+# binary), so every rebuild invalidated the Keychain "Always Allow" ACL entry on
+# Claude Code's credentials item and macOS re-prompted. Re-sign with the stable
+# Apple Development identity before every launch; the pinned identifier matches
+# the bundle identifier so dev and packaged builds share one ACL entry.
+# See docs/adr/0004-stable-signing-identity-for-keychain-acl.md.
+[target.aarch64-apple-darwin]
+# Sign-if-possible, launch regardless: on a machine without this certificate the
+# codesign fails harmlessly and the binary keeps its ad-hoc signature (prompts
+# recur there, but dev still works).
+runner = ["/bin/sh", "-c", 'codesign -f -s "Apple Development: hi@kvnwolf.com (MK5XC3ST46)" -i com.kvnwolf.mad-eye "$0" || echo "mad-eye: signing identity unavailable; Keychain prompts will recur" >&2; exec "$0" "$@"']

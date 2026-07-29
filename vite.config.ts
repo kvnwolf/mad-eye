@@ -7,19 +7,19 @@ import { defineConfig } from "vite";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-	// vite@8 resolves tsconfig path aliases natively
-	resolve: { tsconfigPaths: true },
-	// prevent Vite from obscuring rust errors
-	clearScreen: false,
-	server: {
-		// portless serves the app through per-worktree custom hostnames
-		allowedHosts: true,
-		// tauri expects a fixed port, fail if that port is not available
-		port: 1420,
-		strictPort: true,
-		host: host || false,
-		hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
-		// tell Vite to ignore watching `src-tauri`
-		watch: { ignored: ["**/src-tauri/**"] },
-	},
+  // prevent Vite from obscuring rust errors
+  clearScreen: false,
+  // vite@8 resolves tsconfig path aliases natively
+  resolve: { tsconfigPaths: true },
+  server: {
+    // portless serves the app through per-worktree custom hostnames
+    allowedHosts: true,
+    hmr: host ? { host, port: 1421, protocol: "ws" } : undefined,
+    host,
+    // tauri expects a fixed port, fail if that port is not available
+    port: 1420,
+    strictPort: true,
+    // tell Vite to ignore watching `src-tauri`
+    watch: { ignored: ["**/src-tauri/**"] },
+  },
 });

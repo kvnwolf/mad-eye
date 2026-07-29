@@ -12,7 +12,8 @@ The webview panel opened by clicking the Eye — renders every Gauge in detail a
 ## Interface
 
 - `renderPopover(root: HTMLElement, snap: Snapshot, opts?: PopoverOptions): void` — the seam. Idempotent: call again with a new Snapshot (and/or opts) to re-render; the previous countdown interval is cleared first.
-- `PopoverOptions { refreshing?: boolean }` — non-Snapshot render input (app state). When true, the Refresh button spins and is disabled (`aria-busy`).
+- `PopoverOptions { refreshing?: boolean; version?: VersionInfo }` — non-Snapshot render input (app state). When `refreshing`, the Refresh button spins and is disabled (`aria-busy`). When `version` is present the footer shows a "v0.1.1" stamp next to "updated ago", plus a DEV badge when `version.dev` (debug builds; the Rust `app_version` command reports both, fetched once at boot — the dev-URL path passes a mock `v0.0.0` + DEV instead).
+- `VersionInfo { version: string; dev: boolean }` — the Rust `app_version` command's payload.
 - `mockSnapshot(state: Status): Snapshot` — dev/mock data.
 - Types: `Snapshot`, `Gauge`, `GaugeKind`, `Mood`, `Status`, `PopoverOptions`.
 - Control contract: the Refresh button carries `data-action="refresh"` and each gauge row carries `data-action="select-driver"` + `data-name="<gauge name>"`; the host (`main.ts`) dispatches on both (Refresh → `refresh_now_cmd`, a gauge → `set_driver`). Launch at login + Quit are in the tray's right-click menu.

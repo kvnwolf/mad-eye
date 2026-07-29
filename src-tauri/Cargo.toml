@@ -1,6 +1,6 @@
 [package]
 name = "mad-eye"
-version = "0.1.1"
+version = "0.2.0"
 description = "Menubar Eye tracking Claude subscription usage"
 authors = ["Kevin Wolf"]
 edition = "2021"
