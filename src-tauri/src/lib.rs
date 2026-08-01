@@ -19,7 +19,7 @@ use tauri::{AppHandle, Emitter, Manager, WindowEvent};
 /// reach it without threading extra state through.
 pub static QUIT: AtomicBool = AtomicBool::new(false);
 
-use keychain::read::read_claude_credentials;
+use keychain::read::{read_claude_credentials, Credentials, KeychainError};
 use usage::client::{fetch_usage, FetchError};
 use usage::mood::{driving_gauge, mood_for};
 use usage::types::{Gauge, GaugeKind, Snapshot, Status};
@@ -31,11 +31,21 @@ const POLL_INTERVAL: Duration = Duration::from_secs(180);
 /// Consecutive failures before the Eye goes Blind (Decision #9).
 const BLIND_AFTER_FAILURES: u32 = 3;
 
+/// Refresh the cached token from the Keychain this many millis BEFORE it actually
+/// expires, so a poll never fetches with a just-expired token (and 401s).
+const TOKEN_EXPIRY_MARGIN_MS: i64 = 60_000;
+
 /// The app's shared state: the latest Snapshot the Popover reads, and the count
 /// of consecutive failed fetches that drives the Blind threshold.
 pub struct AppState {
     pub snapshot: Mutex<Snapshot>,
     pub fail_count: Mutex<u32>,
+    /// The last Keychain read, cached so the poll reuses it until the token nears
+    /// expiry instead of re-reading every tick. Each read of Claude Code's item
+    /// can trigger a macOS authorization prompt (Claude Code resets the item's ACL
+    /// on token refresh), so fewer reads = fewer prompts. `None` until the first
+    /// read; cleared on a 401 so the next tick picks up Claude Code's fresh token.
+    cached_credentials: Mutex<Option<Credentials>>,
     /// The user's Driving-Gauge selection: the chosen Gauge NAME, or `None` for
     /// the default (Session). Persisted to `driver.json` and threaded into
     /// `driving_gauge` on every refresh. Seeded from disk at startup.
@@ -212,6 +222,7 @@ pub fn run() {
                 }),
                 fail_count: Mutex::new(0),
                 selected_driver: Mutex::new(selected_driver),
+                cached_credentials: Mutex::new(None),
             });
 
             // Headless poll loop: first tick immediate, then every 180s — skipped
@@ -274,21 +285,23 @@ fn next_poll_delay(app: &AppHandle) -> Duration {
 /// must stay self-contained and safe to run concurrently. Emits AFTER storing so
 /// a live listener never sees an event newer than AppState.
 pub fn refresh_now(app: &AppHandle) {
-    let (last, mut fail_count, selected_driver) = {
+    let (last, mut fail_count, selected_driver, mut cached) = {
         let state = app.state::<AppState>();
         let snapshot = state.snapshot.lock().unwrap().clone();
         let fail_count = *state.fail_count.lock().unwrap();
         let selected_driver = state.selected_driver.lock().unwrap().clone();
-        (snapshot, fail_count, selected_driver)
+        let cached = state.cached_credentials.lock().unwrap().clone();
+        (snapshot, fail_count, selected_driver, cached)
     };
 
-    let snapshot = poll_once(&last, &mut fail_count, selected_driver.as_deref());
+    let snapshot = poll_once(&last, &mut fail_count, selected_driver.as_deref(), &mut cached);
     log_snapshot(&snapshot);
 
     {
         let state = app.state::<AppState>();
         *state.snapshot.lock().unwrap() = snapshot.clone();
         *state.fail_count.lock().unwrap() = fail_count;
+        *state.cached_credentials.lock().unwrap() = cached;
     }
 
     let _ = app.emit("snapshot-updated", &snapshot);
@@ -297,8 +310,13 @@ pub fn refresh_now(app: &AppHandle) {
 /// One poll tick as a fold over the previous Snapshot. Reads credentials, fetches
 /// usage, and applies the failure policy (Decisions #2, #3, #9). `fail_count` is
 /// mutated in place: reset on success, incremented on every failure.
-fn poll_once(last: &Snapshot, fail_count: &mut u32, selected: Option<&str>) -> Snapshot {
-    let credentials = match read_claude_credentials() {
+fn poll_once(
+    last: &Snapshot,
+    fail_count: &mut u32,
+    selected: Option<&str>,
+    cached: &mut Option<Credentials>,
+) -> Snapshot {
+    let credentials = match credentials_for(cached, now_millis()) {
         Ok(credentials) => credentials,
         Err(_) => {
             // No credentials at all → immediately Blind; nothing to be stale about.
@@ -336,6 +354,9 @@ fn poll_once(last: &Snapshot, fail_count: &mut u32, selected: Option<&str>) -> S
         // Stale for a few polls (Claude Code may refresh it), then go Blind once we
         // hit the threshold. Only auth failures ever count toward Blind.
         Err(FetchError::Unauthorized) => {
+            // The token is dead (Claude Code likely rotated it early). Drop the
+            // cache so the next tick re-reads the Keychain for the fresh token.
+            *cached = None;
             *fail_count += 1;
             let blind = *fail_count >= BLIND_AFTER_FAILURES;
             Snapshot {
@@ -375,6 +396,36 @@ fn poll_once(last: &Snapshot, fail_count: &mut u32, selected: Option<&str>) -> S
                 fetched_at: last.fetched_at,
             }
         }
+    }
+}
+
+/// Return a usable token: the cached one if it's still comfortably before expiry,
+/// otherwise read the Keychain and cache the result. This is the ONLY Keychain
+/// read on the poll path, so a cache hit means no read — and no macOS
+/// authorization prompt — this tick. A cache miss (empty or near-expiry) reads
+/// and refreshes the cache; a read failure leaves the cache untouched and
+/// propagates so the caller can go Blind.
+fn credentials_for(
+    cached: &mut Option<Credentials>,
+    now: i64,
+) -> Result<Credentials, KeychainError> {
+    if let Some(credentials) = cached {
+        if !token_expired(credentials.expires_at, now) {
+            return Ok(credentials.clone());
+        }
+    }
+    let fresh = read_claude_credentials()?;
+    *cached = Some(fresh.clone());
+    Ok(fresh)
+}
+
+/// Whether a cached token should be refreshed from the Keychain. True once we are
+/// within `TOKEN_EXPIRY_MARGIN_MS` of expiry. An unknown expiry (`None`) is
+/// treated as expired — we never keep a token we can't reason about.
+fn token_expired(expires_at: Option<i64>, now: i64) -> bool {
+    match expires_at {
+        Some(expires_at) => now >= expires_at - TOKEN_EXPIRY_MARGIN_MS,
+        None => true,
     }
 }
 
@@ -505,12 +556,27 @@ fn iso_from_millis(ms: i64) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::iso_from_millis;
+    use super::{iso_from_millis, token_expired, TOKEN_EXPIRY_MARGIN_MS};
 
     #[test]
     fn iso_from_millis_matches_known_instants() {
         assert_eq!(iso_from_millis(0), "1970-01-01T00:00:00Z");
         assert_eq!(iso_from_millis(1_000_000_000_000), "2001-09-09T01:46:40Z");
         assert_eq!(iso_from_millis(1_609_459_200_000), "2021-01-01T00:00:00Z");
+    }
+
+    #[test]
+    fn token_expiry_respects_the_margin() {
+        let now = 1_000_000_000_000;
+        // Comfortably in the future → still valid (cache hit, no Keychain read).
+        assert!(!token_expired(Some(now + 8 * 3_600_000), now));
+        // Already past → expired.
+        assert!(token_expired(Some(now - 1), now));
+        // Inside the margin → refresh early so a fetch never 401s on a stale token.
+        assert!(token_expired(Some(now + TOKEN_EXPIRY_MARGIN_MS - 1), now));
+        // Just outside the margin → still valid.
+        assert!(!token_expired(Some(now + TOKEN_EXPIRY_MARGIN_MS + 1), now));
+        // Unknown expiry → never cached.
+        assert!(token_expired(None, now));
     }
 }
