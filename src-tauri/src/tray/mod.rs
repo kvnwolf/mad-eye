@@ -61,8 +61,8 @@ pub fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
     app.manage(PopoverGuard::new());
 
     // Right-click menu: a "Launch at login" checkmark seeded from the autostart
-    // plugin's real state, a separator, then "Quit". Keep a clone of the check
-    // item so the menu-event handler can flip its checkmark after toggling.
+    // plugin's real state, "Reveal Logs in Finder", a separator, then "Quit".
+    // Keep a clone of the check item so the menu-event handler can flip it.
     let launch = CheckMenuItem::with_id(
         app,
         "launch",
@@ -71,10 +71,13 @@ pub fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
         app.autolaunch().is_enabled().unwrap_or(false),
         None::<&str>,
     )?;
+    let logs =
+        tauri::menu::MenuItem::with_id(app, "logs", "Reveal Logs in Finder", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let quit = tauri::menu::MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = MenuBuilder::new(app)
         .item(&launch)
+        .item(&logs)
         .item(&separator)
         .item(&quit)
         .build()?;
@@ -97,6 +100,16 @@ pub fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
                 } else {
                     let _ = al.enable();
                     let _ = launch_check.set_checked(true);
+                }
+            }
+            "logs" => {
+                crate::log_message("revealing logs in Finder");
+                if let Err(error) = std::process::Command::new("open")
+                    .arg("-R")
+                    .arg(crate::log_path())
+                    .spawn()
+                {
+                    crate::log_message(&format!("failed to reveal logs: {error}"));
                 }
             }
             // Explicit Quit: set the clean-quit flag so `lib.rs`'s run handler lets

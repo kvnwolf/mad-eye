@@ -56,7 +56,8 @@ struct UsageResponse {
 struct LimitEntry {
     kind: String,
     percent: f64,
-    resets_at: String,
+    #[serde(default)]
+    resets_at: Option<String>,
     #[serde(default)]
     scope: Option<Scope>,
 }
@@ -81,7 +82,8 @@ struct ScopeModel {
 #[derive(Deserialize)]
 struct Window {
     utilization: f64,
-    resets_at: String,
+    #[serde(default)]
+    resets_at: Option<String>,
 }
 
 /// Parse the endpoint JSON into ordered Gauges.
@@ -135,7 +137,7 @@ fn gauge_from_limit(limit: LimitEntry) -> Option<Gauge> {
         name,
         kind,
         utilization: limit.percent,
-        resets_at: limit.resets_at,
+        resets_at: limit.resets_at.unwrap_or_default(),
     })
 }
 
@@ -171,7 +173,7 @@ fn gauge_from_window(name: &str, kind: GaugeKind, window: Window) -> Gauge {
         name: name.to_string(),
         kind,
         utilization,
-        resets_at: window.resets_at,
+        resets_at: window.resets_at.unwrap_or_default(),
     }
 }
 

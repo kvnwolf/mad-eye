@@ -1,5 +1,11 @@
 {
   "tracker": { "type": "github" },
+  "release": {
+    "type": "homebrew-cask",
+    "tap": "kvnwolf/homebrew-tap",
+    "cask": "mad-eye",
+    "notaryProfile": "mad-eye-notary"
+  },
   "files": [
     {
       "path": "CLAUDE.md",
@@ -14,6 +20,18 @@
     {
       "path": "README.md",
       "update_when": ["When setup commands or usage change"]
+    },
+    {
+      "path": "src-tauri/src/tray/CONTEXT.md",
+      "update_when": [
+        "When tray behavior, menu actions, Popover positioning, or invariants change"
+      ]
+    },
+    {
+      "path": "src-tauri/src/usage/CONTEXT.md",
+      "update_when": [
+        "When endpoint parsing, Gauge/Snapshot contracts, or driving policy change"
+      ]
     }
   ],
   "checks": [

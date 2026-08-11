@@ -83,6 +83,8 @@ story:
 
 - 🔒 **Your token never leaves your Mac** except to `api.anthropic.com`.
 - 🚫 **No telemetry, no analytics, no servers.** There's no backend — just your Mac and Anthropic.
+- 📝 **Diagnostic logs stay local** at `~/Library/Logs/mad-eye/mad-eye.log`; they contain status and
+  error metadata, never tokens or response bodies. Right-click the Eye → **Reveal Logs in Finder**.
 - 👁 **It never writes or refreshes your credentials** — strictly read-only. If the token expires,
   the Eye just goes blind until Claude Code refreshes it.
 - On first launch macOS asks to read the *"Claude Code-credentials"* Keychain item — click
@@ -98,8 +100,8 @@ Don't take my word for it — read the [Keychain read](src-tauri/src/keychain/re
 - It polls Anthropic's OAuth usage endpoint (undocumented — a future change on their side could
   break it) and maps the limits to gauges + a mood.
 - The **popover** is a native frosted panel — vanilla TypeScript, macOS vibrancy, theme-aware.
-- It's a **ghost app**: no Dock icon, no ⌘-Tab. Launch-at-login and Quit live in the Eye's
-  right-click menu.
+- It's a **ghost app**: no Dock icon, no ⌘-Tab. Launch-at-login, Reveal Logs, and Quit live in the
+  Eye's right-click menu.
 
 ## Development
 
@@ -117,7 +119,7 @@ seeds a coherent popover (Fable as the driving gauge), so screenshots match the 
 MAD_EYE_FAKE_PCT=97 bun tauri dev    # 40 calm · 70 nervous · 90 paranoid · 97 frantic · 100 shattered
 ```
 
-Releases are cut with the [`release`](.claude/skills/release/SKILL.md) skill (universal DMG →
+Releases are cut with `/dobby:release` (universal DMG → Developer ID signing + notarization →
 GitHub Release → Homebrew cask).
 
 ## License

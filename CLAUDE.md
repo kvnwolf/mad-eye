@@ -13,7 +13,7 @@ A macOS menubar app showing Claude subscription usage limits (the /usage panel p
 
 **Dev**: the web side runs via `dobby up` / `dobby dev` — dobby infers the dev command and wraps it in portless, so do NOT pin a dev command or hardcode a dev URL here. The NATIVE app (menubar Eye, real tray behavior) runs via `bun tauri dev`, which boots Vite itself on the fixed port 1420 that `src-tauri/tauri.conf.json` expects.
 
-**Release**: `./scripts/release-mac.sh` builds the universal DMG, signs it with the Developer ID identity, notarizes it via the `mad-eye-notary` Keychain credential profile, and staples the ticket (ADR 0005). Releases are built locally only — CI never runs `tauri build`.
+**Release**: `/dobby:release` delegates to the config-driven `dobby release` flow: bump, gate, universal DMG, Developer ID signing, notarization via the `mad-eye-notary` Keychain profile, GitHub Release, Homebrew cask update, and smoke check (ADR 0005). Releases are built locally only — CI never runs `tauri build`.
 
 ## Module map
 
@@ -39,5 +39,5 @@ Each module gets its own CONTEXT.md (purpose · Files · Interface · Invariants
 
 - `/dobby:execute` runs `bunx dobby up` and reads the dev URL from `bunx dobby env` (portless-resolved, worktree-aware — never hardcode it). That URL serves the Popover UI in a browser for programmatic verification.
 - Native behavior (menubar icon, Agitation, Keychain reads) is NOT reachable through the dev URL — verify it via `bun tauri dev` plus human/screenshot checks.
-- The Rust side is gated by the `cargo check` extra in `dobby.config.json`; the inferred gate covers the TS side.
+- The Rust side is gated by the `cargo test` extra in `dobby.config.json`; the inferred gate covers the TS side.
 - Issue tracker: GitHub Issues (`tracker.type: "github"` in `dobby.config.json`).

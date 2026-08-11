@@ -282,6 +282,24 @@ mod parse_limits {
     }
 
     #[test]
+    fn exhausted_subscription_accepts_null_reset_timestamp() {
+        let json = r#"{
+            "five_hour": { "utilization": 0, "resets_at": null },
+            "limits": [
+                { "kind": "session", "percent": 0, "resets_at": null, "scope": null },
+                { "kind": "weekly_all", "percent": 100, "resets_at": "2026-08-11T22:00:00Z", "scope": null },
+                { "kind": "weekly_scoped", "percent": 72, "resets_at": "2026-08-11T22:00:00Z", "scope": { "model": { "display_name": "Fable" } } }
+            ]
+        }"#;
+
+        let gauges = parse_usage(json).expect("an exhausted subscription is still readable usage");
+        assert_eq!(gauges.len(), 3);
+        assert_eq!(gauges[0].resets_at, "");
+        assert_eq!(gauges[1].kind, GaugeKind::WeeklyAll);
+        assert_eq!(gauges[1].utilization, 100.0);
+    }
+
+    #[test]
     fn malformed_json_is_a_parse_error() {
         // Garbage input must surface as FetchError::Parse, not a panic.
         let result = parse_usage("this is not json {");

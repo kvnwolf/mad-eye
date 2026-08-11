@@ -18,7 +18,7 @@
     ]
   },
   "devDependencies": {
-    "@kvnwolf/dobby": "^0.3.2",
+    "@kvnwolf/dobby": "^0.12.0",
     "@tauri-apps/cli": "^2",
     "vite": "^8"
   }

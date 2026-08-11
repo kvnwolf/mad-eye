@@ -3,6 +3,9 @@ mod keychain;
 mod tray;
 pub mod usage;
 
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use std::thread;
@@ -34,6 +37,31 @@ const BLIND_AFTER_FAILURES: u32 = 3;
 /// Refresh the cached token from the Keychain this many millis BEFORE it actually
 /// expires, so a poll never fetches with a just-expired token (and 401s).
 const TOKEN_EXPIRY_MARGIN_MS: i64 = 60_000;
+
+/// Ruta estable de logs en macOS para que el diagnóstico siga disponible si el
+/// Popover no abre. La app es exclusiva de macOS, así que usa Library/Logs.
+pub(crate) fn log_path() -> PathBuf {
+    std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("Library/Logs/mad-eye/mad-eye.log")
+}
+
+/// Añade una línea de diagnóstico sin incluir credenciales ni cuerpos de respuesta.
+pub(crate) fn log_message(message: &str) {
+    println!("[mad-eye] {message}");
+
+    let path = log_path();
+    let Some(dir) = path.parent() else {
+        return;
+    };
+    if std::fs::create_dir_all(dir).is_err() {
+        return;
+    }
+    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(path) {
+        let _ = writeln!(file, "{} {message}", now_millis());
+    }
+}
 
 /// The app's shared state: the latest Snapshot the Popover reads, and the count
 /// of consecutive failed fetches that drives the Blind threshold.
@@ -164,6 +192,8 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            log_message("app starting");
+
             // Ghost app: no Dock icon, no ⌘-Tab presence.
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
@@ -184,7 +214,10 @@ pub fn run() {
                 }
             }
 
-            tray::build_tray(app.handle())?;
+            if let Err(error) = tray::build_tray(app.handle()) {
+                log_message(&format!("tray setup failed: {error}"));
+                return Err(error.into());
+            }
 
             // Native frosted-glass Popover. The window is transparent (see
             // `tauri.conf.json`: `transparent` + `macOSPrivateApi`); here we lay a
@@ -318,7 +351,8 @@ fn poll_once(
 ) -> Snapshot {
     let credentials = match credentials_for(cached, now_millis()) {
         Ok(credentials) => credentials,
-        Err(_) => {
+        Err(error) => {
+            log_message(&format!("credential read failed: {error:?}"));
             // No credentials at all → immediately Blind; nothing to be stale about.
             *fail_count += 1;
             return Snapshot {
@@ -354,6 +388,7 @@ fn poll_once(
         // Stale for a few polls (Claude Code may refresh it), then go Blind once we
         // hit the threshold. Only auth failures ever count toward Blind.
         Err(FetchError::Unauthorized) => {
+            log_message("usage fetch failed: Unauthorized");
             // The token is dead (Claude Code likely rotated it early). Drop the
             // cache so the next tick re-reads the Keychain for the fresh token.
             *cached = None;
@@ -379,6 +414,7 @@ fn poll_once(
         // down and the poll backs off to that time (below); everything else just
         // waits for the next normal poll.
         Err(error) => {
+            log_message(&format!("usage fetch failed: {error:?}"));
             let retry_at = match &error {
                 FetchError::RateLimited(Some(secs)) => {
                     Some(now_millis() + (*secs as i64) * 1000)
@@ -465,10 +501,10 @@ fn title_case(value: &str) -> String {
 
 /// Log the current Snapshot. NEVER logs the token — only status/mood/gauges.
 fn log_snapshot(snapshot: &Snapshot) {
-    println!(
-        "[mad-eye] status={:?} mood={:?} plan={:?} driving_idx={:?} gauges={:?}",
+    log_message(&format!(
+        "status={:?} mood={:?} plan={:?} driving_idx={:?} gauges={:?}",
         snapshot.status, snapshot.mood, snapshot.plan, snapshot.driving_idx, snapshot.gauges
-    );
+    ));
 }
 
 /// Current time as epoch millis (matches the TS `fetchedAt` contract).

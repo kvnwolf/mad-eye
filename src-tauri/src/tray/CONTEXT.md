@@ -4,11 +4,11 @@ The menubar Eye: creates the macOS tray icon, and owns the Popover it toggles.
 
 ## Files
 
-- `mod.rs` — `build_tray(app)`: builds the tray (id `"eye"`, a static rendered Eye frame, template icon), attaches a right-click context menu (Launch at login + Quit) and routes its events, and wires left-click to toggle the Popover; plus the Popover show/hide/position logic and the blur-vs-click race guard. Refresh is NOT in the menu — it lives in the Popover.
+- `mod.rs` — `build_tray(app)`: builds the tray (id `"eye"`, a static rendered Eye frame, template icon), attaches a right-click context menu (Launch at login + Reveal Logs in Finder + Quit) and routes its events, and wires left-click to toggle the Popover; plus the Popover show/hide/position logic and the blur-vs-click race guard. Refresh is NOT in the menu — it lives in the Popover.
 
 ## Interface
 
-- `build_tray(app: &AppHandle) -> tauri::Result<TrayIcon>` — call once from `lib.rs` `.setup()`. Builds the right-click menu (Launch at login + Quit) and its `on_menu_event` router, wires left-click to the Popover toggle, and manages the `PopoverGuard` state. Reach the built icon later via `AppHandle::tray_by_id("eye")`.
+- `build_tray(app: &AppHandle) -> tauri::Result<TrayIcon>` — call once from `lib.rs` `.setup()`. Builds the right-click menu (Launch at login + Reveal Logs in Finder + Quit) and its `on_menu_event` router, wires left-click to the Popover toggle, and manages the `PopoverGuard` state. Reach the built icon later via `AppHandle::tray_by_id("eye")`.
 - `hide_popover(app: &AppHandle)` — hide the Popover and stamp the last-hide time. Called by the tray toggle and by `lib.rs`'s `on_window_event` blur handler (hide-on-blur).
 - `PopoverGuard` — managed state holding the last-hide `Instant`; drives the reopen race guard. Constructed and managed by `build_tray`.
 
@@ -20,7 +20,7 @@ The menubar Eye: creates the macOS tray icon, and owns the Popover it toggles.
 - Both hide routes (tray toggle + blur) MUST go through `hide_popover` so every hide stamps the guard; otherwise the blur-then-click sequence double-toggles the Popover back open.
 - The reopen guard (`REOPEN_GUARD`, ~150ms) must stay above the macOS blur→click gap and below a deliberate reopen.
 - Left-click toggles: visible → `hide_popover`; hidden → position from the tray `rect` + `show()` + `set_focus()`. It MUST NOT fetch — opening the Popover used to spawn `crate::refresh_now`, and rapidly reopening could spam the endpoint into a 429 (→ Blind). Usage now refreshes ONLY via the 180s poll and the Popover's Refresh control.
-- The tray HAS a right-click context menu: `MenuBuilder` assembles a `"launch"` `CheckMenuItem` + separator + `"quit"` `MenuItem`, attached with `.menu(&menu)` + `.show_menu_on_left_click(false)` so right-click shows the menu and left-click stays the Popover toggle. `on_menu_event` routes `"launch"` (flip autolaunch via the autostart plugin, then mirror the new state onto a cloned `CheckMenuItem`'s checkmark) and `"quit"` (set `crate::QUIT`, then `app.exit(0)`). Refresh is NOT in the menu — it is a button INSIDE the Popover that invokes `refresh_now_cmd` (wired by the delegated click handler in `src/main.ts`).
+- The tray HAS a right-click context menu: `MenuBuilder` assembles a `"launch"` `CheckMenuItem` + `"logs"` + separator + `"quit"`, attached with `.menu(&menu)` + `.show_menu_on_left_click(false)` so right-click shows the menu and left-click stays the Popover toggle. `on_menu_event` routes `"launch"` (flip autolaunch via the autostart plugin, then mirror the new state onto a cloned `CheckMenuItem`'s checkmark), `"logs"` (append to and reveal `~/Library/Logs/mad-eye/mad-eye.log` in Finder), and `"quit"` (set `crate::QUIT`, then `app.exit(0)`). Refresh is NOT in the menu — it is a button INSIDE the Popover that invokes `refresh_now_cmd` (wired by the delegated click handler in `src/main.ts`).
 - The Popover window is transparent + frosted (`tauri.conf.json` `transparent:true` + `macOSPrivateApi`; vibrancy applied in `lib.rs` setup) and is sized to its content by the webview (`src/main.ts` `setSize`). `position_popover` therefore anchors by the TOP edge (`y = tray_rect.bottom`, X centred on the icon and clamped to the monitor): a content resize keeps the top-left fixed (tao) so the panel stays just under the Eye and grows downward. It reads `outer_size()` at click time, which already reflects the latest `setSize`.
 
 ## What's intentionally NOT here
