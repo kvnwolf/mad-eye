@@ -7,7 +7,7 @@
         "@tauri-apps/api": "^2",
       },
       "devDependencies": {
-        "@kvnwolf/dobby": "^0.12.0",
+        "@kvnwolf/dobby": "^0.12.1",
         "@tauri-apps/cli": "^2",
         "vite": "^8",
       },
@@ -42,7 +42,7 @@
 
     "@henrygd/queue": ["@henrygd/queue@1.2.0", "", {}, "sha512-jW/BLSTpcvExDhqJGxtIPgGr2O0IFF8XUNDwEbfCfhrXT8a4xztQ9Lv6U/vbYzYC0xVWn+3zv6YnLUh3bEFUKA=="],
 
-    "@kvnwolf/dobby": ["@kvnwolf/dobby@0.12.0", "", { "dependencies": { "@biomejs/biome": "^2.5.4", "knip": "^6.26.0", "portless": "^0.15.3", "taze": "^19.14.1", "typescript": "^7.0.2" }, "peerDependencies": { "@tailwindcss/vite": "*", "@tanstack/devtools-vite": "*", "@tanstack/react-start": "*", "@vitejs/plugin-react": "*", "drizzle-kit": "*", "nitro": "*", "vite": "*", "vitest": "*" }, "optionalPeers": ["@tailwindcss/vite", "@tanstack/devtools-vite", "@tanstack/react-start", "@vitejs/plugin-react", "drizzle-kit", "nitro", "vite", "vitest"], "bin": { "dobby": "src/index.ts" } }, "sha512-30g9nIAqpVqxqjNRxWhvS6P+YADxT9pXKizQuLGTn5NLnEhM8auCl4lz/4Pg3uw8JxOZxM/RSIj/d2pVy5esqg=="],
+    "@kvnwolf/dobby": ["@kvnwolf/dobby@0.12.1", "", { "dependencies": { "@biomejs/biome": "^2.5.4", "knip": "^6.26.0", "portless": "^0.15.3", "taze": "^19.14.1", "typescript": "^7.0.2" }, "peerDependencies": { "@tailwindcss/vite": "*", "@tanstack/devtools-vite": "*", "@tanstack/react-start": "*", "@vitejs/plugin-react": "*", "drizzle-kit": "*", "nitro": "*", "vite": "*", "vitest": "*" }, "optionalPeers": ["@tailwindcss/vite", "@tanstack/devtools-vite", "@tanstack/react-start", "@vitejs/plugin-react", "drizzle-kit", "nitro", "vite", "vitest"], "bin": { "dobby": "src/index.ts" } }, "sha512-xhXdQtSveoGRVi/PrslMSdM8lJemi11+rsRnT/MXdIlTt0eRY8A1cRUX7iJIjh66VjNQ/+ClyaK6OerBQSnhzw=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.6", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1" } }, "sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg=="],
 

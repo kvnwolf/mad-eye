@@ -4,6 +4,7 @@
     "type": "homebrew-cask",
     "tap": "kvnwolf/homebrew-tap",
     "cask": "mad-eye",
+    "lockstep": ["src-tauri/tauri.conf.json"],
     "notaryProfile": "mad-eye-notary"
   },
   "files": [
